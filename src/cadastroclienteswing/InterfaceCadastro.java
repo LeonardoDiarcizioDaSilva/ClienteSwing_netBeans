@@ -8,7 +8,6 @@ import cliente.dao.ClienteDAOSingleton;
 import cliente.dao.IClienteDAO;
 import cliente.domain.Cliente;
 import javax.swing.JOptionPane;
-import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -64,7 +63,7 @@ public class InterfaceCadastro extends javax.swing.JFrame {
         btnSalvar = new javax.swing.JButton();
         btnAlterar = new javax.swing.JButton();
         btnLimpar = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
+        btnExcluir = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         tabelaClientesCadasrados = new javax.swing.JTable();
         jScrollBar2 = new javax.swing.JScrollBar();
@@ -203,10 +202,10 @@ public class InterfaceCadastro extends javax.swing.JFrame {
             }
         });
 
-        jButton1.setText("EXCLUIR");
-        jButton1.addMouseListener(new java.awt.event.MouseAdapter() {
+        btnExcluir.setText("EXCLUIR");
+        btnExcluir.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jButton1MouseClicked(evt);
+                btnExcluirMouseClicked(evt);
             }
         });
 
@@ -267,7 +266,7 @@ public class InterfaceCadastro extends javax.swing.JFrame {
                                         .addGap(80, 80, 80)
                                         .addComponent(btnConsultar)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(jButton1)
+                                        .addComponent(btnExcluir)
                                         .addGap(72, 72, 72)
                                         .addComponent(btnLimpar))
                                     .addGroup(layout.createSequentialGroup()
@@ -331,7 +330,7 @@ public class InterfaceCadastro extends javax.swing.JFrame {
                     .addComponent(btnSalvar)
                     .addComponent(btnAlterar)
                     .addComponent(btnLimpar)
-                    .addComponent(jButton1)
+                    .addComponent(btnExcluir)
                     .addComponent(btnConsultar))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -472,7 +471,7 @@ public class InterfaceCadastro extends javax.swing.JFrame {
         String numero = txtNumero.getText();
         String celular = txtCelular.getText();
             
-        if (iClienteDAO.consultar(cpf) == null) {
+        if (getClient(cpf) == null) {
             
             Cliente cliente = new Cliente(nome, cpf, email, endereco, numero, celular);
             iClienteDAO.cadastrar(cliente);
@@ -487,8 +486,8 @@ public class InterfaceCadastro extends javax.swing.JFrame {
 
     private void btnAlterarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnAlterarMouseClicked
         // TODO add your handling code here:
-        //txtClienteInfo(getClient(txtCpf.getText()));
-        String cpf = txtCpf.getText();
+        int clienteSelecionado = tabelaClientesCadasrados.getSelectedRow();
+        
         String novoNome = txtNome.getText();
         String novoEmail = txtEmail.getText();
         String novoEndereco = txtEndereco.getText();
@@ -500,8 +499,10 @@ public class InterfaceCadastro extends javax.swing.JFrame {
             
             Cliente cliente = new Cliente(novoNome, txtCpf.getText(), novoEmail, novoEndereco, novoNumero, novoCelular);
             iClienteDAO.alterar(cliente);
+            tabelaClientesCadasrados.setValueAt(cliente.getNome(), clienteSelecionado, 0);
+            tabelaClientesCadasrados.setValueAt(cliente.getEmail(), clienteSelecionado, 2);
             JOptionPane.showMessageDialog(rootPane, "Cliente alterado com sucesso!");
-        }
+        } txtPadrao();
     }//GEN-LAST:event_btnAlterarMouseClicked
 
     private void tabelaClientesCadasradosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tabelaClientesCadasradosMouseClicked
@@ -519,30 +520,36 @@ public class InterfaceCadastro extends javax.swing.JFrame {
 
     private void btnConsultarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnConsultarMouseClicked
         // TODO add your handling code here:
-        String cpf = txtCpf.getText();
-        Cliente cliente = getClient(cpf);
+        Cliente cliente = getClient(txtCpf.getText());
         
         if (cliente != null) {
             
-            txtClienteInfo(getClient(cpf));
-            defaultTableModel.setValueAt(cliente.getNome(), 0, 0);
-            defaultTableModel.setValueAt(cliente.getCpf(), 0, 1);
-            defaultTableModel.setValueAt(cliente.getEmail(), 0, 2);
+            txtClienteInfo(cliente);
+            tabelaClientesCadasrados.setRowSelectionInterval(clienteSelecionado(cliente.getCpf()), clienteSelecionado(cliente.getCpf()));
         } else {
             JOptionPane.showMessageDialog(rootPane, "Cliente não encontrado.");
         }
     }//GEN-LAST:event_btnConsultarMouseClicked
 
-    private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
+    private void btnExcluirMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnExcluirMouseClicked
         // TODO add your handling code here:
-        String cpf = txtCpf.getText();
+        Cliente cliente = getClient(txtCpf.getText());
         
-        if (getClient(cpf) != null) {
+        
+        if (cliente != null) {
+            int resposta = JOptionPane.showConfirmDialog(this, "Deseja excluir o cliente: " + cliente + "?",
+                    "Cancelar",JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+            if (resposta == JOptionPane.YES_OPTION) {
+                int linhaParaExcluir = clienteSelecionado(cliente.getCpf());
             
-            iClienteDAO.excluir(cpf);
-            JOptionPane.showMessageDialog(rootPane, "Cliente excluido com sucesso.");
+                iClienteDAO.excluir(cliente.getCpf());
+                JOptionPane.showMessageDialog(rootPane, "Cliente excluido com sucesso.");
+                if (linhaParaExcluir != -1) {
+                    defaultTableModel.removeRow(linhaParaExcluir);
+                }
+            }
         }
-    }//GEN-LAST:event_jButton1MouseClicked
+    }//GEN-LAST:event_btnExcluirMouseClicked
 
     /**
      * @param args the command line arguments
@@ -589,6 +596,19 @@ public class InterfaceCadastro extends javax.swing.JFrame {
         txtCelular.setText(cliente.getCel());
     }
     
+    private int clienteSelecionado (String cpfProcurado) {
+        
+            for (int i = 0; i < defaultTableModel.getRowCount(); i++) {
+                
+                String cpfConsultado = (String) tabelaClientesCadasrados.getValueAt(i, 1);
+                
+                if (cpfConsultado.equals(cpfProcurado)) {
+                    return i;
+                }
+            }
+        return -1;
+    }
+    
     private static Cliente getClient (String cpf) {
         
         Cliente cliente = iClienteDAO.consultar(cpf);
@@ -598,10 +618,10 @@ public class InterfaceCadastro extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAlterar;
     private javax.swing.JButton btnConsultar;
+    private javax.swing.JButton btnExcluir;
     private javax.swing.JButton btnLimpar;
     private javax.swing.JButton btnSalvar;
     private javax.swing.JCheckBox checkNightMode;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

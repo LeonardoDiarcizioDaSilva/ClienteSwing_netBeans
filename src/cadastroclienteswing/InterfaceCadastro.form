@@ -58,7 +58,7 @@
                                       <EmptySpace min="-2" pref="80" max="-2" attributes="0"/>
                                       <Component id="btnConsultar" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace max="32767" attributes="0"/>
-                                      <Component id="jButton1" min="-2" max="-2" attributes="0"/>
+                                      <Component id="btnExcluir" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace min="-2" pref="72" max="-2" attributes="0"/>
                                       <Component id="btnLimpar" min="-2" max="-2" attributes="0"/>
                                   </Group>
@@ -146,7 +146,7 @@
                   <Component id="btnSalvar" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btnAlterar" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btnLimpar" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="jButton1" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="btnExcluir" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btnConsultar" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
@@ -297,12 +297,12 @@
         <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="btnLimparMouseClicked"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JButton" name="jButton1">
+    <Component class="javax.swing.JButton" name="btnExcluir">
       <Properties>
         <Property name="text" type="java.lang.String" value="EXCLUIR"/>
       </Properties>
       <Events>
-        <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="jButton1MouseClicked"/>
+        <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="btnExcluirMouseClicked"/>
       </Events>
     </Component>
     <Container class="javax.swing.JScrollPane" name="jScrollPane2">
