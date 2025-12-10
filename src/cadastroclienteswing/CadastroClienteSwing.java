@@ -5,8 +5,6 @@
 package cadastroclienteswing;
 
 import cadastroclienteswing.InterfaceCadastro;
-import cliente.dao.ClienteMapDAO;
-import cliente.dao.IClienteDAO;
 
 /**
  *
@@ -14,13 +12,10 @@ import cliente.dao.IClienteDAO;
  */
 public class CadastroClienteSwing {
 
-    private static IClienteDAO iClienteDAO;
-
     public static void main(String[] args) {
         InterfaceCadastro tela = new InterfaceCadastro();
         tela.setVisible(true);
-        
-        iClienteDAO = new ClienteMapDAO();
+
     }
 }
     

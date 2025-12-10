@@ -6,7 +6,13 @@ package cadastroclienteswing;
 
 import cliente.dao.ClienteDAOSingleton;
 import cliente.dao.IClienteDAO;
+import cliente.domain.ChangeClient;
+import cliente.domain.ClientDelete;
+import cliente.domain.ClientFinder;
+import cliente.domain.ClientRegister;
 import cliente.domain.Cliente;
+import cliente.domain.ClientServicesSingleton;
+import cliente.domain.ClientServices;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
@@ -17,12 +23,13 @@ import javax.swing.table.DefaultTableModel;
 public class InterfaceCadastro extends javax.swing.JFrame {
     
     private static IClienteDAO iClienteDAO;
-    private DefaultTableModel defaultTableModel = new DefaultTableModel() {
-        @Override
-        public boolean isCellEditable(int row, int colums) {
-            return false;
-        }
-    };
+    
+    private static DefaultTableModel defaultTableModel;
+    
+    private static ClientRegister clientRegister;
+    private static ChangeClient changeClient;
+    private static ClientDelete clientDelete;
+    private static ClientFinder clientFinder;
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(InterfaceCadastro.class.getName());
     
@@ -32,8 +39,14 @@ public class InterfaceCadastro extends javax.swing.JFrame {
     public InterfaceCadastro() {
         initComponents();
         initCustomComponents();
-        
+
         iClienteDAO = ClienteDAOSingleton.getInstance();
+        
+        clientRegister = ClientServicesSingleton.clientRegisterInstance();
+        changeClient = ClientServicesSingleton.changeClientInstance();
+        clientDelete = ClientServicesSingleton.clienteDeleteInstance();
+        clientFinder = ClientServicesSingleton.clientFinderInstance();
+        ClientServices.setInterfaceCadastro(this);
     }
 
     /**
@@ -48,7 +61,6 @@ public class InterfaceCadastro extends javax.swing.JFrame {
         lblNome = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
         sair = new javax.swing.JButton();
-        checkNightMode = new javax.swing.JCheckBox();
         txtNome = new javax.swing.JTextField();
         lblCpf = new javax.swing.JLabel();
         txtCpf = new javax.swing.JTextField();
@@ -94,8 +106,6 @@ public class InterfaceCadastro extends javax.swing.JFrame {
             }
         });
         sair.addActionListener(this::sairActionPerformed);
-
-        checkNightMode.setText("Night mode");
 
         txtNome.setText("Nome para cadastrar");
         txtNome.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -290,10 +300,7 @@ public class InterfaceCadastro extends javax.swing.JFrame {
                                             .addComponent(jLabel1)
                                             .addComponent(txtEmail)
                                             .addComponent(jLabel3)
-                                            .addComponent(txtCelular, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGap(0, 0, Short.MAX_VALUE)
-                                        .addComponent(checkNightMode)))
+                                            .addComponent(txtCelular, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE))))
                                 .addGap(17, 17, 17))))))
         );
         layout.setVerticalGroup(
@@ -337,9 +344,7 @@ public class InterfaceCadastro extends javax.swing.JFrame {
                     .addComponent(jScrollBar2, javax.swing.GroupLayout.DEFAULT_SIZE, 186, Short.MAX_VALUE)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 39, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(sair)
-                    .addComponent(checkNightMode))
+                .addComponent(sair)
                 .addContainerGap())
         );
 
@@ -463,46 +468,27 @@ public class InterfaceCadastro extends javax.swing.JFrame {
     }//GEN-LAST:event_btnLimparMouseClicked
 
     private void btnSalvarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnSalvarMouseClicked
-        // TODO add your handling code here:   
-        String nome = txtNome.getText();
-        String cpf = txtCpf.getText();
-        String email = txtEmail.getText();
-        String endereco = txtEndereco.getText();
-        String numero = txtNumero.getText();
-        String celular = txtCelular.getText();
-            
-        if (getClient(cpf) == null) {
-            
-            Cliente cliente = new Cliente(nome, cpf, email, endereco, numero, celular);
-            iClienteDAO.cadastrar(cliente);
-            defaultTableModel.addRow(new Object[]{cliente.getNome(), cliente.getCpf(), cliente.getEmail()});
-            JOptionPane.showMessageDialog(rootPane, "Usuário cadastrado com sucesso");
-        } else {
-            JOptionPane.showMessageDialog(rootPane, "Cliente ja cadastrado!");
-        }
+        // TODO add your handling code here:
+        clientRegister.executor(); {
         
+            if (clientSearch(clientRegister.cliente.getCpf()) == -1) {
+            
+                var cliente = clientRegister.cliente;
+                defaultTableModel.addRow(new Object[]{cliente.getNome(), cliente.getCpf(), cliente.getEmail()});
+            }
+        }
         txtPadrao();
     }//GEN-LAST:event_btnSalvarMouseClicked
 
     private void btnAlterarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnAlterarMouseClicked
         // TODO add your handling code here:
-        int clienteSelecionado = tabelaClientesCadasrados.getSelectedRow();
+        changeClient.executor();
+        var cliente = changeClient.cliente;
+        tabelaClientesCadasrados.setValueAt(cliente.getNome(), clientSearch(cliente.getCpf()), 0);
+        tabelaClientesCadasrados.setValueAt(cliente.getEmail(), clientSearch(cliente.getCpf()), 2);
+        tabelaClientesCadasrados.setRowSelectionInterval(clientSearch(cliente.getCpf()), clientSearch(cliente.getCpf()));
         
-        String novoNome = txtNome.getText();
-        String novoEmail = txtEmail.getText();
-        String novoEndereco = txtEndereco.getText();
-        String novoNumero = txtNumero.getText();
-        String novoCelular = txtCelular.getText();
-        
-        
-        if (getClient(txtCpf.getText()) != null) {
-            
-            Cliente cliente = new Cliente(novoNome, txtCpf.getText(), novoEmail, novoEndereco, novoNumero, novoCelular);
-            iClienteDAO.alterar(cliente);
-            tabelaClientesCadasrados.setValueAt(cliente.getNome(), clienteSelecionado, 0);
-            tabelaClientesCadasrados.setValueAt(cliente.getEmail(), clienteSelecionado, 2);
-            JOptionPane.showMessageDialog(rootPane, "Cliente alterado com sucesso!");
-        } txtPadrao();
+        txtPadrao();
     }//GEN-LAST:event_btnAlterarMouseClicked
 
     private void tabelaClientesCadasradosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tabelaClientesCadasradosMouseClicked
@@ -520,35 +506,21 @@ public class InterfaceCadastro extends javax.swing.JFrame {
 
     private void btnConsultarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnConsultarMouseClicked
         // TODO add your handling code here:
-        Cliente cliente = getClient(txtCpf.getText());
-        
-        if (cliente != null) {
-            
-            txtClienteInfo(cliente);
-            tabelaClientesCadasrados.setRowSelectionInterval(clienteSelecionado(cliente.getCpf()), clienteSelecionado(cliente.getCpf()));
-        } else {
-            JOptionPane.showMessageDialog(rootPane, "Cliente não encontrado.");
-        }
+        clientFinder.executor();
+        txtClienteInfo(clientFinder.cliente);
+        tabelaClientesCadasrados.setRowSelectionInterval(clientSearch(clientFinder.cliente.getCpf()), clientSearch(clientFinder.cliente.getCpf()));
     }//GEN-LAST:event_btnConsultarMouseClicked
 
     private void btnExcluirMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnExcluirMouseClicked
         // TODO add your handling code here:
-        Cliente cliente = getClient(txtCpf.getText());
+        int linhaParaExcluir = clientSearch(txtCpf.getText());
         
+        clientDelete.executor();
         
-        if (cliente != null) {
-            int resposta = JOptionPane.showConfirmDialog(this, "Deseja excluir o cliente: " + cliente + "?",
-                    "Cancelar",JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-            if (resposta == JOptionPane.YES_OPTION) {
-                int linhaParaExcluir = clienteSelecionado(cliente.getCpf());
-            
-                iClienteDAO.excluir(cliente.getCpf());
-                JOptionPane.showMessageDialog(rootPane, "Cliente excluido com sucesso.");
-                if (linhaParaExcluir != -1) {
-                    defaultTableModel.removeRow(linhaParaExcluir);
-                }
-            }
+        if (linhaParaExcluir != -1) {
+            defaultTableModel.removeRow(linhaParaExcluir);
         }
+        txtPadrao();
     }//GEN-LAST:event_btnExcluirMouseClicked
 
     /**
@@ -596,7 +568,7 @@ public class InterfaceCadastro extends javax.swing.JFrame {
         txtCelular.setText(cliente.getCel());
     }
     
-    private int clienteSelecionado (String cpfProcurado) {
+    private int clientSearch (String cpfProcurado) {
         
             for (int i = 0; i < defaultTableModel.getRowCount(); i++) {
                 
@@ -621,7 +593,6 @@ public class InterfaceCadastro extends javax.swing.JFrame {
     private javax.swing.JButton btnExcluir;
     private javax.swing.JButton btnLimpar;
     private javax.swing.JButton btnSalvar;
-    private javax.swing.JCheckBox checkNightMode;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -641,7 +612,28 @@ public class InterfaceCadastro extends javax.swing.JFrame {
     private javax.swing.JTextField txtNumero;
     // End of variables declaration//GEN-END:variables
 
+    public String getTxtNome() {
+        return txtNome.getText();
+    }
+    public String getTxtCpf() {
+        return txtCpf.getText();
+    }
+    public String getTxtEmail() {
+        return txtEmail.getText();
+    }
+    public String getTxtEndereco() {
+        return this.txtEndereco.getText();
+    }
+    public String getTxtNumero() {
+        return this.txtNumero.getText();
+    }
+    public String getTxtCelular() {
+        return this.txtCelular.getText();
+    }
+    
     private void initCustomComponents() {
+        
+        defaultTableModel = TableModelSingleton.getInstance();
         
         defaultTableModel.addColumn("Nome");
         defaultTableModel.addColumn("CPF");
