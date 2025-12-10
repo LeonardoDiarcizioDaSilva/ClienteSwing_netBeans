@@ -14,7 +14,7 @@ import javax.swing.JOptionPane;
 public class ClientRegister extends ClientServices {
     
     @Override
-    protected Cliente serviceExecutor() {
+    protected boolean serviceExecutor() {
         
         nome = interfaceCadastro.getTxtNome();
         cpf = interfaceCadastro.getTxtCpf();
@@ -25,11 +25,13 @@ public class ClientRegister extends ClientServices {
     
         if (!clientValidator(cpf)) {
             
-            cliente = new Cliente(nome, cpf, email, endereco, numero, celular);
-            iClienteDAO.cadastrar(cliente);
+            this.cliente = new Cliente(nome, cpf, email, endereco, numero, celular);
+            iClienteDAO.cadastrar(this.cliente);
             JOptionPane.showMessageDialog(interfaceCadastro, "Cliente cadastrado com sucesso!");
+            return true;
         } else {
             JOptionPane.showMessageDialog(interfaceCadastro, "Cliente ja se encontra cadastrado.");
-        } return cliente;
+            return false;
+        }
     }
 }

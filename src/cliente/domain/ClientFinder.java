@@ -12,15 +12,16 @@ import javax.swing.JOptionPane;
  */
 public class ClientFinder extends ClientServices{
     
-    protected Cliente serviceExecutor() {
+    protected boolean serviceExecutor() {
         
         cpf = interfaceCadastro.getTxtCpf();
         
         if (clientValidator(cpf)) {
             
-            cliente = iClienteDAO.consultar(cpf);
+            this.cliente = iClienteDAO.consultar(cpf);
+            return true;
         } else {
             JOptionPane.showMessageDialog(interfaceCadastro, "Cliente não encontrado.");
-        } return cliente;
+        } return false;
     }
 }

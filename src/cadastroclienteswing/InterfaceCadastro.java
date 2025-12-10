@@ -469,25 +469,23 @@ public class InterfaceCadastro extends javax.swing.JFrame {
 
     private void btnSalvarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnSalvarMouseClicked
         // TODO add your handling code here:
-        clientRegister.executor(); {
-        
-            if (clientSearch(clientRegister.cliente.getCpf()) == -1) {
-            
-                var cliente = clientRegister.cliente;
-                defaultTableModel.addRow(new Object[]{cliente.getNome(), cliente.getCpf(), cliente.getEmail()});
-            }
+        if (clientRegister.executor()) {
+            var cliente = clientRegister.getCliente();
+            defaultTableModel.addRow(new Object[]{cliente.getNome(), cliente.getCpf(), cliente.getEmail()});
         }
+        
         txtPadrao();
     }//GEN-LAST:event_btnSalvarMouseClicked
 
     private void btnAlterarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnAlterarMouseClicked
         // TODO add your handling code here:
-        changeClient.executor();
-        var cliente = changeClient.cliente;
-        tabelaClientesCadasrados.setValueAt(cliente.getNome(), clientSearch(cliente.getCpf()), 0);
-        tabelaClientesCadasrados.setValueAt(cliente.getEmail(), clientSearch(cliente.getCpf()), 2);
-        tabelaClientesCadasrados.setRowSelectionInterval(clientSearch(cliente.getCpf()), clientSearch(cliente.getCpf()));
-        
+        if (changeClient.executor()) {
+            
+            var cliente = changeClient.getCliente();
+            tabelaClientesCadasrados.setValueAt(cliente.getNome(), clientSearch(cliente.getCpf()), 0);
+            tabelaClientesCadasrados.setValueAt(cliente.getEmail(), clientSearch(cliente.getCpf()), 2);
+            tabelaClientesCadasrados.setRowSelectionInterval(clientSearch(cliente.getCpf()), clientSearch(cliente.getCpf()));
+        }
         txtPadrao();
     }//GEN-LAST:event_btnAlterarMouseClicked
 
@@ -506,19 +504,17 @@ public class InterfaceCadastro extends javax.swing.JFrame {
 
     private void btnConsultarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnConsultarMouseClicked
         // TODO add your handling code here:
-        clientFinder.executor();
-        txtClienteInfo(clientFinder.cliente);
-        tabelaClientesCadasrados.setRowSelectionInterval(clientSearch(clientFinder.cliente.getCpf()), clientSearch(clientFinder.cliente.getCpf()));
+        if (clientFinder.executor()) {
+            
+            txtClienteInfo(clientFinder.getCliente());
+            tabelaClientesCadasrados.setRowSelectionInterval(clientSearch(clientFinder.getCliente().getCpf()), clientSearch(clientFinder.getCliente().getCpf()));
+        }
     }//GEN-LAST:event_btnConsultarMouseClicked
 
     private void btnExcluirMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnExcluirMouseClicked
         // TODO add your handling code here:
-        int linhaParaExcluir = clientSearch(txtCpf.getText());
-        
-        clientDelete.executor();
-        
-        if (linhaParaExcluir != -1) {
-            defaultTableModel.removeRow(linhaParaExcluir);
+        if (clientDelete.executor()) {
+            defaultTableModel.removeRow(clientSearch(clientDelete.getCliente().getCpf()));
         }
         txtPadrao();
     }//GEN-LAST:event_btnExcluirMouseClicked

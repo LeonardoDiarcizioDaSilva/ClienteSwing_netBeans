@@ -13,21 +13,20 @@ import javax.swing.JOptionPane;
 public class ClientDelete extends ClientServices {
     
     @Override
-    protected Cliente serviceExecutor() {
+    protected boolean serviceExecutor() {
         
         cpf = interfaceCadastro.getTxtCpf();
         
         if (clientValidator(cpf)) {
-            
-            var cliente = iClienteDAO.consultar(cpf);
-            
-            int resposta = JOptionPane.showConfirmDialog(interfaceCadastro, "Deseja excluir o cliente: " + cliente.toString() + " ?", "EXCLUIR CLIENTE", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+
+            this.cliente = iClienteDAO.consultar(cpf);
+            int resposta = JOptionPane.showConfirmDialog(interfaceCadastro, "Deseja excluir o cliente: " + this.cliente.toString() + " ?", "EXCLUIR CLIENTE", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
             
             if (resposta == JOptionPane.YES_OPTION) {
                 
                 iClienteDAO.excluir(cpf);
                 JOptionPane.showMessageDialog(interfaceCadastro, "Cliente excluido com sucesso!");
-            }
-        } return cliente;
+            } return true;
+        } return false;
     }
 }

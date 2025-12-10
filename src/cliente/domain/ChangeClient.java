@@ -13,7 +13,7 @@ import javax.swing.JOptionPane;
 public class ChangeClient extends ClientServices{
 
     @Override
-    protected Cliente serviceExecutor() {
+    protected boolean serviceExecutor() {
         
         nome = interfaceCadastro.getTxtNome();
         cpf = interfaceCadastro.getTxtCpf();
@@ -24,11 +24,12 @@ public class ChangeClient extends ClientServices{
         
         if (clientValidator(cpf)) {
             
-            cliente = new Cliente (nome, cpf, email, endereco, numero, celular);
-            iClienteDAO.alterar(cliente);
+            this.cliente = new Cliente (nome, cpf, email, endereco, numero, celular);
+            iClienteDAO.alterar(this.cliente);
             JOptionPane.showMessageDialog(interfaceCadastro, "Cliente alterado com sucesso!");
+            return true;
         } else {
             JOptionPane.showMessageDialog(interfaceCadastro, "Cliente não encontrado.");
-        } return cliente;
+        } return false;
     }
 }

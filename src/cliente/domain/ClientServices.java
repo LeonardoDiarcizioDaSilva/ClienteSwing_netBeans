@@ -19,6 +19,7 @@ public abstract class ClientServices {
     public static void setInterfaceCadastro (InterfaceCadastro view) {
         interfaceCadastro = view;
     }
+    protected Cliente cliente;
     
     String nome;
     String cpf;
@@ -27,9 +28,9 @@ public abstract class ClientServices {
     String numero;
     String celular;
     
-    public void executor() {
+    public boolean executor() {
         iClienteDAO = ClienteDAOSingleton.getInstance();
-        serviceExecutor();
+        return serviceExecutor();
     }
     
     protected boolean clientValidator(String cpf) {
@@ -41,6 +42,9 @@ public abstract class ClientServices {
         } return false;
     }
     
-    protected abstract Cliente serviceExecutor();
-    public Cliente cliente;
+    public Cliente getCliente() {
+        return this.cliente;
+    }
+    
+    protected abstract boolean serviceExecutor();
 }
