@@ -4,7 +4,7 @@
  */
 package cliente.dao;
 
-import cliente.domain.Cliente;
+import client.domain.Client;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,13 +16,13 @@ import java.util.Collection;
  */
 public class ClienteMapDAO implements IClienteDAO{
 
-    private Map<String, Cliente> map;
+    private Map<String, Client> map;
     
     public ClienteMapDAO() {
         this.map = new HashMap<>();
     }
     
-    public boolean cadastrar (Cliente cliente) {
+    public boolean cadastrar (Client cliente) {
         
         if (map.containsKey(cliente.getCpf())) {
             return false;
@@ -36,9 +36,9 @@ public class ClienteMapDAO implements IClienteDAO{
         this.map.remove(cpf);
     }
     
-    public void alterar (Cliente cliente) {
+    public void alterar (Client cliente) {
         
-        Cliente clienteCadastrado = this.map.get(cliente.getCpf());
+        Client clienteCadastrado = this.map.get(cliente.getCpf());
         
         if (clienteCadastrado != null) {
             
@@ -55,13 +55,13 @@ public class ClienteMapDAO implements IClienteDAO{
     }
 
     @Override
-    public Cliente consultar (String cpf) {
+    public Client consultar (String cpf) {
         
         return this.map.get(cpf);
     }
     
     @Override
-    public Collection<Cliente> buscarTodos() {
+    public Collection<Client> buscarTodos() {
         return this.map.values();
     }
     
