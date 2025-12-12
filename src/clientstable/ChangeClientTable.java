@@ -17,12 +17,13 @@ public class ChangeClientTable extends ClientTable{
         
         String cpfSearch = client.getCpf();
         
-        if (getClientRow(cpfSearch) != -1) {
-            
-            defaultTableModel.setValueAt(client.getNome(), getClientRow(cpfSearch), nome);
-            defaultTableModel.setValueAt(client.getEmail(), getClientRow(cpfSearch), email);
-            tableClient.setSelectionMode(getClientRow(cpfSearch));
-        }
+        int clientRow = getClientRow(cpfSearch);
+        
+        if (clientRow == -1) return;
+        
+        tableClient.setRowSelectionInterval(clientRow, clientRow);
+        defaultTableModel.setValueAt(client.getNome(), clientRow, nome);
+        defaultTableModel.setValueAt(client.getEmail(), clientRow,email);
     }
     
 }

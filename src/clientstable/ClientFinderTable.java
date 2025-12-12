@@ -17,9 +17,8 @@ public class ClientFinderTable extends ClientTable{
         
         String cpfSearch = client.getCpf();
         
-        if (getClientRow(cpfSearch) != -1) {
-            
-            tableClient.setSelectionMode(getClientRow(cpfSearch));
-        }
+        var clientRow = getClientRow(cpfSearch);
+        
+        if (clientRow != -1) tableClient.setRowSelectionInterval(clientRow, clientRow);
     }
 }

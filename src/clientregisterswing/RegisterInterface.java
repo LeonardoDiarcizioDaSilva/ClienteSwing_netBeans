@@ -488,19 +488,14 @@ public class RegisterInterface extends javax.swing.JFrame {
 
     private void btnSalvarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnSalvarMouseClicked
         // TODO add your handling code here:
-        if (clientRegister.executor()) {
-            Client client = clientRegister.getCliente();
-            addClientTable.executor(client);
-        }
+        if (clientRegister.executor()) addClientTable.executor(clientRegister.getCliente());
+        
         txtPadrao();
     }//GEN-LAST:event_btnSalvarMouseClicked
 
     private void btnAlterarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnAlterarMouseClicked
         // TODO add your handling code here:
-        if (changeClient.executor()) {
-            Client client = changeClient.getCliente();
-            changeClienteTable.executor(client);
-        }
+        if (changeClient.executor()) changeClienteTable.executor(changeClient.getCliente());
         txtPadrao();
     }//GEN-LAST:event_btnAlterarMouseClicked
 
@@ -510,8 +505,8 @@ public class RegisterInterface extends javax.swing.JFrame {
         String cpf = (String) tabelaClientesCadasrados.getValueAt(clickedRow, 1);
         
         if (evt.getClickCount() == 2) {
-            
-            txtCpf.setText(cpf);
+
+            setTxtCpf(cpf);
             clientFinder.executor();
             txtClienteInfo(clientFinder.getCliente());
         }
@@ -521,16 +516,15 @@ public class RegisterInterface extends javax.swing.JFrame {
         // TODO add your handling code here:
         if (clientFinder.executor()) {
             
-            clientFinder.executor();
-            txtClienteInfo(clientFinder.getCliente());
+            var client = clientFinder.getCliente();
+            clientFinderTable.executor(client);
+            txtClienteInfo(client);
         }
     }//GEN-LAST:event_btnConsultarMouseClicked
 
     private void btnExcluirMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnExcluirMouseClicked
         // TODO add your handling code here:
-        if (clientDelete.executor()) {
-            clientDeletorTable.executor(clientDelete.getCliente());
-        }
+        if (clientDelete.executor()) clientDeletorTable.executor(clientDelete.getCliente());
         txtPadrao();
     }//GEN-LAST:event_btnExcluirMouseClicked
 
@@ -577,25 +571,6 @@ public class RegisterInterface extends javax.swing.JFrame {
         txtEndereco.setText(cliente.getEnd());
         txtNumero.setText(cliente.getNum());
         txtCelular.setText(cliente.getCel());
-    }
-    
-    private int clientSearch (String cpfProcurado) {
-        
-            for (int i = 0; i < defaultTableModel.getRowCount(); i++) {
-                
-                String cpfConsultado = (String) tabelaClientesCadasrados.getValueAt(i, 1);
-                
-                if (cpfConsultado.equals(cpfProcurado)) {
-                    return i;
-                }
-            }
-        return -1;
-    }
-    
-    private static Client getClient (String cpf) {
-        
-        Client cliente = iClienteDAO.consultar(cpf);
-        return cliente;
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -15,21 +15,21 @@ public class ChangeClient extends ClientServices{
     @Override
     protected boolean serviceExecutor() {
         
-        nome = registerInterface.getTxtNome();
-        cpf = registerInterface.getTxtCpf();
-        email = registerInterface.getTxtEmail();
-        endereco = registerInterface.getTxtEndereco();
-        numero = registerInterface.getTxtNumero();
-        celular = registerInterface.getTxtCelular();
+        String nome = registerInterface.getTxtNome();
+        String cpf = registerInterface.getTxtCpf();
+        String email = registerInterface.getTxtEmail();
+        String endereco = registerInterface.getTxtEndereco();
+        String numero = registerInterface.getTxtNumero();
+        String celular = registerInterface.getTxtCelular();
         
-        if (clientValidator(cpf)) {
+        if (!clientValidator(cpf)) {
             
-            this.cliente = new Client (nome, cpf, email, endereco, numero, celular);
-            iClienteDAO.alterar(this.cliente);
-            JOptionPane.showMessageDialog(registerInterface, "Cliente alterado com sucesso!");
-            return true;
-        } else {
             JOptionPane.showMessageDialog(registerInterface, "Cliente não encontrado.");
-        } return false;
+            return false;
+        }
+        
+        iClienteDAO.alterar(this.cliente = new Client (nome, cpf, email, endereco, numero, celular));
+        JOptionPane.showMessageDialog(registerInterface, "Cliente alterado com sucesso!");
+        return true;
     }
 }

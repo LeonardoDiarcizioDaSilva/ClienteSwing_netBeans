@@ -21,13 +21,6 @@ public abstract class ClientServices {
     }
     protected Client cliente;
     
-    String nome;
-    String cpf;
-    String email;
-    String endereco;
-    String numero;
-    String celular;
-    
     public boolean executor() {
         iClienteDAO = ClienteDAOSingleton.getInstance();
         return serviceExecutor();
@@ -35,11 +28,9 @@ public abstract class ClientServices {
     
     protected boolean clientValidator(String cpf) {
         
-        Client cliente = iClienteDAO.consultar(cpf);
+        this.cliente = iClienteDAO.consultar(cpf);
         
-        if (cliente != null) {
-            return true;
-        } return false;
+        return cliente != null;
     }
     
     public Client getCliente() {

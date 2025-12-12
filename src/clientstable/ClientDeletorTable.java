@@ -17,8 +17,8 @@ public class ClientDeletorTable extends ClientTable{
         
         String cpfSearch = registerInterface.getTxtCpf();
         
-        if (getClientRow(cpfSearch) != -1) {
-            defaultTableModel.removeRow(getClientRow(cpfSearch));
-        }
+        int clientRow = getClientRow(cpfSearch);
+        
+        if (clientRow != -1) defaultTableModel.removeRow(clientRow);
     }
 }

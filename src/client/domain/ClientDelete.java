@@ -15,18 +15,16 @@ public class ClientDelete extends ClientServices {
     @Override
     protected boolean serviceExecutor() {
         
-        cpf = registerInterface.getTxtCpf();
+        String cpf = registerInterface.getTxtCpf();
         
-        if (clientValidator(cpf)) {
-
-            this.cliente = iClienteDAO.consultar(cpf);
-            int resposta = JOptionPane.showConfirmDialog(registerInterface, "Deseja excluir o cliente: " + this.cliente.toString() + " ?", "EXCLUIR CLIENTE", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+        if (!clientValidator(cpf)) return false;
+        
+        int resposta = JOptionPane.showConfirmDialog(registerInterface, "Deseja excluir o cliente: " + this.cliente.toString() + " ?", "EXCLUIR CLIENTE", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
             
-            if (resposta == JOptionPane.YES_OPTION) {
+        if (resposta == JOptionPane.YES_OPTION) {
                 
-                iClienteDAO.excluir(cpf);
-                JOptionPane.showMessageDialog(registerInterface, "Cliente excluido com sucesso!");
-            } return true;
-        } return false;
+            iClienteDAO.excluir(cpf);
+            JOptionPane.showMessageDialog(registerInterface, "Cliente excluido com sucesso!");
+        } return true;
     }
 }

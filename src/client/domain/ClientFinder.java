@@ -14,14 +14,11 @@ public class ClientFinder extends ClientServices{
     
     protected boolean serviceExecutor() {
         
-        cpf = registerInterface.getTxtCpf();
+        String cpf = registerInterface.getTxtCpf();
         
-        if (clientValidator(cpf)) {
-            
-            this.cliente = iClienteDAO.consultar(cpf);
-            return true;
-        } else {
-            JOptionPane.showMessageDialog(registerInterface, "Cliente não encontrado.");
-        } return false;
+        if (clientValidator(cpf)) return true;
+        
+        JOptionPane.showMessageDialog(registerInterface, "Cliente não encontrado.");
+        return false;
     }
 }
