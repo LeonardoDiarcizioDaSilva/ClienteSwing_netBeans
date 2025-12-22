@@ -16,9 +16,7 @@ public class AddClientTable extends ClientTable{
     @Override
     protected void tableServicesExecutor(Client client) {
         
-        ClientDTO dto = registerInterface.getClientDTO();
-        
-        if (getClientRow(dto.cpf) == -1) {
+        if (getClientRow(client.getCpf()) == -1) {
             defaultTableModel.addRow(new Object[]{client.getNome(), client.getCpf(), client.getEmail()});
         }
     }

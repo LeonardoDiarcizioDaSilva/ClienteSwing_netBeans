@@ -26,11 +26,12 @@ public class ClientServiceExecutor extends ServiceExecutor<Client> {
 
     
     @Override
-    public void create() {
+    public boolean create(Client client) {
         
-        ClientDTO dto = registerInterface.getClientDTO();
+        if(validator(client.getCpf())) return false;
         
-        iGenericDAO.mapCreate(this.entity = new Client(dto.nome, dto.cpf, dto.email, dto.endereco, dto.numero, dto.celular));
+        iGenericDAO.mapCreate(this.entity = client);
+        return true;
     }
     
     @Override
@@ -41,18 +42,23 @@ public class ClientServiceExecutor extends ServiceExecutor<Client> {
     }
     
     @Override
-    public void update(Client client) {
+    public boolean update(Client client) {
         
-        ClientDTO dto = registerInterface.getClientDTO();
+        if(!validator(client.getCpf())) return false;
         
-        iGenericDAO.mapUpdate(this.entity = new Client(dto.nome, dto.cpf, dto.email, dto.endereco, dto.numero, dto.celular));
+        iGenericDAO.mapUpdate(this.entity = client);
+        return true;
     }
     
     @Override
-    public void delete(Client client) {
+    public boolean delete(String cpf) {
         
-        if(!validator(client.getCpf())) return;
+        if(!validator(cpf)) return false;
         
+        int resposta = JOptionPane.showConfirmDialog(registerInterface, "Deseje excluir o cliente: " + this.entity.toString() + "?", "Excluir cliente", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        
+        if(resposta == JOptionPane.NO_OPTION) return false;
         iGenericDAO.mapDelete(this.entity);
+        return true;
     }
 }

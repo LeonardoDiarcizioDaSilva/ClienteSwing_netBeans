@@ -29,15 +29,15 @@ public abstract class ServiceExecutor<T extends Persistent>{
     public boolean validator(String code) {
         
         this.entity = iGenericDAO.getEntity(code);
-        return entity != null;
+        return this.entity != null;
     }
     
     public T getEntity() {
         return this.entity;
     }
     
-    protected abstract void create();
-    protected abstract T read(String cpf);
-    protected abstract void update(T entity);
-    protected abstract void delete(T entity);
+    protected abstract boolean create(T entity);
+    protected abstract T read(String code);
+    protected abstract boolean update(T entity);
+    protected abstract boolean delete(String code);
 }

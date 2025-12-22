@@ -477,12 +477,13 @@ public class RegisterInterface extends javax.swing.JFrame {
 
     private void btnSalvarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnSalvarMouseClicked
         // TODO add your handling code here:
-        if(clientServiceExecutor.validator(getClientDTO().cpf)) {
+        ClientDTO dto = getClientDTO();
+        
+        if(!clientServiceExecutor.create(new Client(dto.nome, dto.cpf, dto.email, dto.endereco, dto.numero, dto.celular))) {
             JOptionPane.showMessageDialog(rootPane, "Cliente ja se encontra cadastrado.", "Cadastrar cliente", JOptionPane.ERROR_MESSAGE);
             return;
         }
         
-        clientServiceExecutor.create();
         addClientTable.executor(clientServiceExecutor.getEntity());
         JOptionPane.showMessageDialog(rootPane, "Cliente cadastrado com sucesso!", "Cadastrar cliente", JOptionPane.INFORMATION_MESSAGE);
         
@@ -491,13 +492,14 @@ public class RegisterInterface extends javax.swing.JFrame {
 
     private void btnAlterarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnAlterarMouseClicked
         // TODO add your handling code here:
-        if(!clientServiceExecutor.validator(getClientDTO().cpf)) {
+        ClientDTO dto = getClientDTO();
+        
+        if(!clientServiceExecutor.update(new Client(dto.nome, dto.cpf, dto.email, dto.endereco, dto.numero, dto.celular))) {
             
             JOptionPane.showMessageDialog(rootPane, "Cliente não encontrado.", "Alterar cliente", JOptionPane.ERROR_MESSAGE);
             return;
         }
         
-        clientServiceExecutor.update(clientServiceExecutor.getEntity());
         changeClienteTable.executor(clientServiceExecutor.getEntity());
         JOptionPane.showMessageDialog(rootPane, "Cliente alterado com sucesso!", "Alterar cliente", JOptionPane.INFORMATION_MESSAGE);
         
@@ -516,7 +518,7 @@ public class RegisterInterface extends javax.swing.JFrame {
 
     private void btnConsultarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnConsultarMouseClicked
         // TODO add your handling code here:
-        if(!clientServiceExecutor.validator(getClientDTO().cpf)) {
+        if(clientServiceExecutor.read(getClientDTO().cpf) == null) {
             JOptionPane.showMessageDialog(rootPane, "Cliente não encontrado.", "Excluir cliente", JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -526,18 +528,13 @@ public class RegisterInterface extends javax.swing.JFrame {
 
     private void btnExcluirMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnExcluirMouseClicked
         // TODO add your handling code here:
-        if(!clientServiceExecutor.validator(getClientDTO().cpf)) {
+        if(!clientServiceExecutor.delete(getClientDTO().cpf)) {
             JOptionPane.showMessageDialog(rootPane, "Cliente não encontrado.", "Excluir cliente", JOptionPane.ERROR_MESSAGE);
             return;
         }
         
-        int resposta = JOptionPane.showConfirmDialog(rootPane, "Deseje excluir o cliente: " + clientServiceExecutor.getEntity().toString() + "?", "Excluir cliente", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-        
-        if(resposta != JOptionPane.NO_OPTION) {
-            clientDeletorTable.executor(clientServiceExecutor.getEntity());
-            clientServiceExecutor.delete(clientServiceExecutor.getEntity());
-            JOptionPane.showMessageDialog(rootPane, "Cliente excluído com sucesso!", "Excluir cliente", JOptionPane.INFORMATION_MESSAGE);
-        }
+        clientDeletorTable.executor(clientServiceExecutor.getEntity());
+        JOptionPane.showMessageDialog(rootPane, "Cliente excluído com sucesso!", "Excluir cliente", JOptionPane.INFORMATION_MESSAGE);
         
         txtPadrao();
     }//GEN-LAST:event_btnExcluirMouseClicked
