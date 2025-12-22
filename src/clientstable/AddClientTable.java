@@ -5,6 +5,7 @@
 package clientstable;
 
 import client.domain.Client;
+import clientregisterswing.RegisterInterface.ClientDTO;
 
 /**
  *
@@ -15,9 +16,9 @@ public class AddClientTable extends ClientTable{
     @Override
     protected void tableServicesExecutor(Client client) {
         
-        String cpfSearch = client.getCpf();
+        ClientDTO dto = registerInterface.getClientDTO();
         
-        if (getClientRow(cpfSearch) == -1) {
+        if (getClientRow(dto.cpf) == -1) {
             defaultTableModel.addRow(new Object[]{client.getNome(), client.getCpf(), client.getEmail()});
         }
     }

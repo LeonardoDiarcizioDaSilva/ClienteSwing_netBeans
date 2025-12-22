@@ -15,7 +15,6 @@ public class ClientInterface {
     public static void main(String[] args) {
         RegisterInterface tela = new RegisterInterface();
         tela.setVisible(true);
-
     }
 }
     

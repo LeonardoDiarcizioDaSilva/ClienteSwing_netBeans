@@ -254,11 +254,12 @@
     </Component>
     <Component class="javax.swing.JTextField" name="txtCelular">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Celular para cadastro"/>
+        <Property name="text" type="java.lang.String" value="Celular para cadastrar"/>
       </Properties>
       <Events>
         <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="txtCelularFocusGained"/>
         <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="txtCelularFocusLost"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtCelularActionPerformed"/>
       </Events>
     </Component>
     <Component class="javax.swing.JButton" name="btnSalvar">

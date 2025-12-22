@@ -5,7 +5,6 @@
 package clientstable;
 
 import client.domain.Client;
-import client.domain.ClientRegister;
 import clientregisterswing.RegisterInterface;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -20,8 +19,6 @@ public abstract class ClientTable {
     public static void setClientInterface (RegisterInterface view) {
         registerInterface = view;
     }
-    
-    public static ClientRegister clientRegister;
     
     public static DefaultTableModel defaultTableModel;
     public JTable tableClient;

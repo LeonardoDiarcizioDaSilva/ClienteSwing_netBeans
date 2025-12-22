@@ -4,22 +4,19 @@
  */
 package clientregisterswing;
 
+import client.dao.ClientMapDAO;
+import client.dao.MapDAOSingleton;
 import clientstable.TableModelSingleton;
-import cliente.dao.ClienteDAOSingleton;
-import cliente.dao.IClienteDAO;
-import client.domain.ChangeClient;
-import client.domain.ClientDelete;
-import client.domain.ClientFinder;
-import client.domain.ClientRegister;
 import client.domain.Client;
-import client.domain.ClientServicesSingleton;
-import client.domain.ClientServices;
+import client.servicesexecutor.ClientServiceExecutor;
+import client.servicesexecutor.ServiceExecutor;
 import clientstable.AddClientTable;
 import clientstable.ChangeClientTable;
 import clientstable.ClientDeletorTable;
 import clientstable.ClientFinderTable;
 import clientstable.ClientTable;
 import clientstable.ClientTableSingleton;
+import javax.crypto.KEM;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -30,14 +27,9 @@ import javax.swing.table.DefaultTableModel;
  */
 public class RegisterInterface extends javax.swing.JFrame {
     
-    private static IClienteDAO iClienteDAO;
-    
     private static DefaultTableModel defaultTableModel;
     
-    private static ClientRegister clientRegister;
-    private static ChangeClient changeClient;
-    private static ClientDelete clientDelete;
-    private static ClientFinder clientFinder;
+    private static ClientServiceExecutor clientServiceExecutor;
     
     private static AddClientTable addClientTable;
     private static ChangeClientTable changeClienteTable;
@@ -52,14 +44,10 @@ public class RegisterInterface extends javax.swing.JFrame {
     public RegisterInterface() {
         initComponents();
         initCustomComponents();
-
-        iClienteDAO = ClienteDAOSingleton.getInstance();
         
-        clientRegister = ClientServicesSingleton.clientRegisterInstance();
-        changeClient = ClientServicesSingleton.changeClientInstance();
-        clientDelete = ClientServicesSingleton.clienteDeleteInstance();
-        clientFinder = ClientServicesSingleton.clientFinderInstance();
-        ClientServices.setRegisterInterface(this);
+        ServiceExecutor.setInterface(this);
+        
+        clientServiceExecutor = MapDAOSingleton.getClientMapDAO();
         
         addClientTable = ClientTableSingleton.addTableInstance();
         changeClienteTable = ClientTableSingleton.changeTableInstance();
@@ -200,7 +188,7 @@ public class RegisterInterface extends javax.swing.JFrame {
 
         jLabel3.setText("Celular:");
 
-        txtCelular.setText("Celular para cadastro");
+        txtCelular.setText("Celular para cadastrar");
         txtCelular.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 txtCelularFocusGained(evt);
@@ -209,6 +197,7 @@ public class RegisterInterface extends javax.swing.JFrame {
                 txtCelularFocusLost(evt);
             }
         });
+        txtCelular.addActionListener(this::txtCelularActionPerformed);
 
         btnSalvar.setText("SALVAR");
         btnSalvar.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -453,7 +442,7 @@ public class RegisterInterface extends javax.swing.JFrame {
     private void txtEnderecoFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtEnderecoFocusLost
         // TODO add your handling code here:
         if (txtEndereco.getText().isEmpty() == true) {
-            txtEndereco.setText("Edenreoço para cadastrar");
+            txtEndereco.setText("Endereço para cadastrar");
         }
     }//GEN-LAST:event_txtEnderecoFocusLost
 
@@ -477,7 +466,7 @@ public class RegisterInterface extends javax.swing.JFrame {
     private void txtCelularFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCelularFocusLost
         // TODO add your handling code here:
         if (txtCelular.getText().isEmpty() == true) {
-            txtCelular.setText("Celular para cadastro");
+            txtCelular.setText("Celular para cadastrar");
         }
     }//GEN-LAST:event_txtCelularFocusLost
 
@@ -488,14 +477,30 @@ public class RegisterInterface extends javax.swing.JFrame {
 
     private void btnSalvarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnSalvarMouseClicked
         // TODO add your handling code here:
-        if (clientRegister.executor()) addClientTable.executor(clientRegister.getCliente());
+        if(clientServiceExecutor.validator(getClientDTO().cpf)) {
+            JOptionPane.showMessageDialog(rootPane, "Cliente ja se encontra cadastrado.", "Cadastrar cliente", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        clientServiceExecutor.create();
+        addClientTable.executor(clientServiceExecutor.getEntity());
+        JOptionPane.showMessageDialog(rootPane, "Cliente cadastrado com sucesso!", "Cadastrar cliente", JOptionPane.INFORMATION_MESSAGE);
         
         txtPadrao();
     }//GEN-LAST:event_btnSalvarMouseClicked
 
     private void btnAlterarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnAlterarMouseClicked
         // TODO add your handling code here:
-        if (changeClient.executor()) changeClienteTable.executor(changeClient.getCliente());
+        if(!clientServiceExecutor.validator(getClientDTO().cpf)) {
+            
+            JOptionPane.showMessageDialog(rootPane, "Cliente não encontrado.", "Alterar cliente", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        clientServiceExecutor.update(clientServiceExecutor.getEntity());
+        changeClienteTable.executor(clientServiceExecutor.getEntity());
+        JOptionPane.showMessageDialog(rootPane, "Cliente alterado com sucesso!", "Alterar cliente", JOptionPane.INFORMATION_MESSAGE);
+        
         txtPadrao();
     }//GEN-LAST:event_btnAlterarMouseClicked
 
@@ -505,28 +510,41 @@ public class RegisterInterface extends javax.swing.JFrame {
         String cpf = (String) tabelaClientesCadasrados.getValueAt(clickedRow, 1);
         
         if (evt.getClickCount() == 2) {
-
-            setTxtCpf(cpf);
-            clientFinder.executor();
-            txtClienteInfo(clientFinder.getCliente());
+            txtClienteInfo(clientServiceExecutor.read(cpf));
         }
     }//GEN-LAST:event_tabelaClientesCadasradosMouseClicked
 
     private void btnConsultarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnConsultarMouseClicked
         // TODO add your handling code here:
-        if (clientFinder.executor()) {
-            
-            var client = clientFinder.getCliente();
-            clientFinderTable.executor(client);
-            txtClienteInfo(client);
+        if(!clientServiceExecutor.validator(getClientDTO().cpf)) {
+            JOptionPane.showMessageDialog(rootPane, "Cliente não encontrado.", "Excluir cliente", JOptionPane.ERROR_MESSAGE);
+            return;
         }
+        
+        txtClienteInfo(clientServiceExecutor.read(getClientDTO().cpf));
     }//GEN-LAST:event_btnConsultarMouseClicked
 
     private void btnExcluirMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnExcluirMouseClicked
         // TODO add your handling code here:
-        if (clientDelete.executor()) clientDeletorTable.executor(clientDelete.getCliente());
+        if(!clientServiceExecutor.validator(getClientDTO().cpf)) {
+            JOptionPane.showMessageDialog(rootPane, "Cliente não encontrado.", "Excluir cliente", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        int resposta = JOptionPane.showConfirmDialog(rootPane, "Deseje excluir o cliente: " + clientServiceExecutor.getEntity().toString() + "?", "Excluir cliente", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        
+        if(resposta != JOptionPane.NO_OPTION) {
+            clientDeletorTable.executor(clientServiceExecutor.getEntity());
+            clientServiceExecutor.delete(clientServiceExecutor.getEntity());
+            JOptionPane.showMessageDialog(rootPane, "Cliente excluído com sucesso!", "Excluir cliente", JOptionPane.INFORMATION_MESSAGE);
+        }
+        
         txtPadrao();
     }//GEN-LAST:event_btnExcluirMouseClicked
+
+    private void txtCelularActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCelularActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtCelularActionPerformed
 
     /**
      * @param args the command line arguments
@@ -558,7 +576,7 @@ public class RegisterInterface extends javax.swing.JFrame {
         txtNome.setText("Nome para cadastrar");
         txtCpf.setText("Cpf para cadastrar");
         txtEmail.setText("Email para cadastrar");
-        txtEndereco.setText("Endereco para cadastrar");
+        txtEndereco.setText("Endereço para cadastrar");
         txtNumero.setText("Número da casa");
         txtCelular.setText("Celular para cadastrar");
     }
@@ -597,28 +615,6 @@ public class RegisterInterface extends javax.swing.JFrame {
     private javax.swing.JTextField txtNome;
     private javax.swing.JTextField txtNumero;
     // End of variables declaration//GEN-END:variables
-
-    public String getTxtNome() {
-        return this.txtNome.getText();
-    }
-    public String getTxtCpf() {
-        return this.txtCpf.getText();
-    }
-    public void setTxtCpf(String txt) {
-        this.txtCpf.setText(txt);
-    }
-    public String getTxtEmail() {
-        return txtEmail.getText();
-    }
-    public String getTxtEndereco() {
-        return this.txtEndereco.getText();
-    }
-    public String getTxtNumero() {
-        return this.txtNumero.getText();
-    }
-    public String getTxtCelular() {
-        return this.txtCelular.getText();
-    }
     
     public JTable getClientsTable() {
         return this.tabelaClientesCadasrados;
@@ -636,5 +632,26 @@ public class RegisterInterface extends javax.swing.JFrame {
         defaultTableModel.addColumn("Email");
         
         tabelaClientesCadasrados.setModel(defaultTableModel);
+    }
+ 
+    public class ClientDTO {
+        public String nome;
+        public String cpf;
+        public String email;
+        public String endereco;
+        public String numero;
+        public String celular;
+    }
+    public ClientDTO getClientDTO() {
+        ClientDTO dto = new ClientDTO();
+        
+        dto.nome = this.txtNome.getText();
+        dto.cpf = this.txtCpf.getText();
+        dto.email = this.txtEmail.getText();
+        dto.endereco = this.txtEndereco.getText();
+        dto.numero = this.txtNumero.getText();
+        dto.celular = this.txtCelular.getText();
+        
+        return dto;
     }
 }

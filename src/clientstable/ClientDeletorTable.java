@@ -5,6 +5,7 @@
 package clientstable;
 
 import client.domain.Client;
+import clientregisterswing.RegisterInterface.ClientDTO;
 
 /**
  *
@@ -15,9 +16,9 @@ public class ClientDeletorTable extends ClientTable{
     @Override
     protected void tableServicesExecutor (Client client) {
         
-        String cpfSearch = registerInterface.getTxtCpf();
+        ClientDTO dto = registerInterface.getClientDTO();
         
-        int clientRow = getClientRow(cpfSearch);
+        int clientRow = getClientRow(dto.cpf);
         
         if (clientRow != -1) defaultTableModel.removeRow(clientRow);
     }

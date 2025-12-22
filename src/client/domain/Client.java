@@ -10,7 +10,7 @@ import java.util.Objects;
  *
  * @author lheop
  */
-public class Client {
+public class Client implements Persistent{
     
     private String nome;
     private String cpf;
@@ -69,6 +69,10 @@ public class Client {
     }
     public void setEmail (String email) {
         this.email = email;
+    }
+    
+    public String getCode() {
+        return this.cpf;
     }
     
     @Override
