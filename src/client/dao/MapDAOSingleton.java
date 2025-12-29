@@ -5,7 +5,6 @@
 package client.dao;
 
 import client.servicesexecutor.ClientServiceExecutor;
-import client.dao.ClientMapDAO;
 
 /**
  *
@@ -17,7 +16,7 @@ public final class MapDAOSingleton {
     
     public static ClientServiceExecutor getClientMapDAO() {
         if(clientServiceExecutor == null) {
-            clientServiceExecutor = new ClientServiceExecutor(new ClientMapDAO());
+            clientServiceExecutor = new ClientServiceExecutor();
         }
         return clientServiceExecutor;
     }

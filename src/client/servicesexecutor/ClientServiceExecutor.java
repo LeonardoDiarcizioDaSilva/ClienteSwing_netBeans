@@ -4,61 +4,39 @@
  */
 package client.servicesexecutor;
 
-import client.dao.ClientMapDAO;
-import client.dao.MapDAOSingleton;
-import client.dao.generic.IGenericDAO;
+import client.dao.generic.GenericDAO;
 import client.domain.Client;
-import clientregisterswing.RegisterInterface;
-import clientregisterswing.RegisterInterface.ClientDTO;
-import javax.swing.JOptionPane;
 
 /**
  *
  * @author lheop
  */
-public class ClientServiceExecutor extends ServiceExecutor<Client> {
+public class ClientServiceExecutor extends GenericDAO<Client>{
 
-    private static MapDAOSingleton mapDAOSingleotn;
-    
-    public ClientServiceExecutor(IGenericDAO dao) {
-        super(dao);
+    public ClientServiceExecutor() {
+        super();
     }
+    
+    @Override
+    public Class<Client> getClassType() {
+        return Client.class;
+    }
+    
+    public void create(Client client) {mapCreate(client);}
+    
+    public Client read(String cpf) {return  mapRead(cpf);}
 
-    
-    @Override
-    public boolean create(Client client) {
+    public void update(String cpf, Client client) {
         
-        if(validator(client.getCpf())) return false;
+        Client oldClient = mapRead(cpf);
+        oldClient.setNome(client.getNome());
+        oldClient.setEmail(client.getEmail());
+        oldClient.setEnd(client.getEnd());
+        oldClient.setNum(client.getNum());
+        oldClient.setCel(client.getCel());
         
-        iGenericDAO.mapCreate(this.entity = client);
-        return true;
+        mapUpdate(cpf, client);
     }
     
-    @Override
-    public Client read(String cpf) {
-        
-        if(!validator(cpf)) return null;
-        return this.entity = iGenericDAO.getEntity(cpf);
-    }
-    
-    @Override
-    public boolean update(Client client) {
-        
-        if(!validator(client.getCpf())) return false;
-        
-        iGenericDAO.mapUpdate(this.entity = client);
-        return true;
-    }
-    
-    @Override
-    public boolean delete(String cpf) {
-        
-        if(!validator(cpf)) return false;
-        
-        int resposta = JOptionPane.showConfirmDialog(registerInterface, "Deseje excluir o cliente: " + this.entity.toString() + "?", "Excluir cliente", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-        
-        if(resposta == JOptionPane.NO_OPTION) return false;
-        iGenericDAO.mapDelete(this.entity);
-        return true;
-    }
+    public void delete(String cpf) {mapDelete(mapRead(cpf));}
 }

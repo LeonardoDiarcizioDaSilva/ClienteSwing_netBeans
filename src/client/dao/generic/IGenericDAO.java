@@ -4,18 +4,14 @@
  */
 package client.dao.generic;
 
-import client.domain.Persistent;
-
 /**
  *
  * @author lheop
  */
-public interface IGenericDAO<T extends Persistent> {
+public interface IGenericDAO<T> {
 
-    public boolean mapCreate(T entity);
-    public T mapRead(T entity);
-    public boolean mapUpdate(T entity);
+    public void mapCreate(T entity);
+    public T mapRead(String code);
+    public void mapUpdate(String code, T entity);
     public void mapDelete(T entity);
-    
-    public T getEntity(String code);
 }

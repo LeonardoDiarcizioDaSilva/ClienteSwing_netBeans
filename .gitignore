@@ -1,1 +1,8 @@
 /dist/
+*.iml
+.idea/
+nbproject/private/
+build.xml
+dist/
+build/
+*.class

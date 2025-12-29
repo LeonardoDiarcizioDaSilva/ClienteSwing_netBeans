@@ -4,15 +4,19 @@
  */
 package client.dao.generic;
 
-import client.domain.Persistent;
+import client.domain.GetCode;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import javax.swing.JOptionPane;
 
 /**
  *
  * @author lheop
  */
-public abstract class GenericDAO<T extends Persistent> implements IGenericDAO<T>{
+public abstract class GenericDAO<T> implements IGenericDAO<T>{
     
     protected Map<Class, Map<String, T>> map;
     
@@ -27,37 +31,49 @@ public abstract class GenericDAO<T extends Persistent> implements IGenericDAO<T>
         }
     }
     
+    public String getCode(T entity) {
+        Field[] fields = entity.getClass().getDeclaredFields();
+        for (Field field: fields) {
+            if(field.isAnnotationPresent(GetCode.class)) {
+                GetCode getId = field.getAnnotation(GetCode.class);
+                try {
+                    Method method = entity.getClass().getDeclaredMethod(getId.value());   
+                    return (String) method.invoke(entity);
+                } catch(NoSuchMethodException e) {
+                    JOptionPane.showMessageDialog(null, "Erro para buscar, por favor contate o suporte.");
+                    return null;
+                } catch(IllegalAccessException | InvocationTargetException e) {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+    
     public abstract Class<T> getClassType();
+    
     @Override
-    public boolean mapCreate(T entity) {
+    public void mapCreate(T entity) {
         
         Map<String, T> internalMap = this.map.get(getClassType());
         
-        if(internalMap.containsKey(entity.getCode())) return false;
-        internalMap.put(entity.getCode(), entity);
-        return true;
+        internalMap.put(getCode(entity), entity);
     }
     
     @Override
-    public T mapRead(T entity) {
+    public T mapRead(String code) {
         
         Map<String, T> internalMap = this.map.get(getClassType());
         
-        if(!internalMap.containsKey(entity.getCode())) return null;
-        return entity;
+        return internalMap.containsKey(code) ? internalMap.get(code) : null;
     }
     
     @Override
-    public boolean mapUpdate(T entity) {
+    public void mapUpdate(String code, T entity) {
         
         Map<String, T> internalMap = this.map.get(getClassType());
         
-        if(!internalMap.containsKey(entity.getCode())) return false;
-        
-        internalMap.remove(entity);
-        internalMap.put(entity.getCode(), entity);
-        
-        return true;
+        internalMap.replace(code, entity);
     }
     
     @Override
@@ -65,14 +81,6 @@ public abstract class GenericDAO<T extends Persistent> implements IGenericDAO<T>
         
         Map<String, T> internalMap = this.map.get(getClassType());
         
-        internalMap.remove(entity.getCode(), entity);
-    }
-    
-    @Override
-    public T getEntity(String code) {
-        
-        Map<String, T> internalMap = this.map.get(getClassType());
-        
-        return internalMap.get(code);
+        internalMap.remove(getCode(entity), entity);
     }
 }
