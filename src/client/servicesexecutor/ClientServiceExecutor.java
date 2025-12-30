@@ -6,7 +6,7 @@ package client.servicesexecutor;
 
 import client.dao.generic.GenericDAO;
 import client.domain.Client;
-
+import clientstable.IObserver;
 /**
  *
  * @author lheop
@@ -16,16 +16,41 @@ public class ClientServiceExecutor extends GenericDAO<Client>{
     public ClientServiceExecutor() {
         super();
     }
-    
+    /*
+    *    Diz qual a classe para o banco de dados.
+    */
     @Override
     public Class<Client> getClassType() {
         return Client.class;
     }
     
-    public void create(Client client) {mapCreate(client);}
-    
+    private static IObserver iObserver;
+    /*
+    *    Faz a injeção de dependência do observer
+    *    sem que meu ClientServiceExecutor tenha necessidade de saber da interface.
+    */
+    public void attach(IObserver iObserver) {
+        this.iObserver = iObserver;
+    }
+    /*
+    *    Responsável chamar o método que cria o cliente, e enviar o sinal que ele foi criado.
+    */
+    public void create(Client client) {
+        
+        mapCreate(client);
+        
+        if (iObserver != null) {
+            iObserver.created(client);
+        }
+    }
+    //Busca e retorna o cliente para quem fez a chamada
     public Client read(String cpf) {return  mapRead(cpf);}
 
+    /*
+    *    Recebe o cpf para buscar e salvar o cliente antigo, depois recebe o cliente novo
+    *        faz a substituição peganos o cliente antigo e fazendo um setter nas informações pedidas
+    /        MENOS o cpf, que é o ID principal e NUNCA deve ser mudado.
+    */
     public void update(String cpf, Client client) {
         
         Client oldClient = mapRead(cpf);
@@ -36,7 +61,22 @@ public class ClientServiceExecutor extends GenericDAO<Client>{
         oldClient.setCel(client.getCel());
         
         mapUpdate(cpf, client);
+        
+        if (iObserver != null) {
+            iObserver.updated(oldClient);
+        }
     }
-    
-    public void delete(String cpf) {mapDelete(mapRead(cpf));}
+    /*
+    *    Faz a busca do cliente pelo cpf, depois chama o método de exclusão.
+    */
+    public void delete(String cpf) {
+        
+        var client = mapRead(cpf);
+        
+        mapDelete(client);
+        
+        if (iObserver != null) {
+            iObserver.deleted(client);
+        }
+    }
 }

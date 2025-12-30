@@ -19,5 +19,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface GetCode {
     
-    String value();
+    //    Nome que sera dado a annotation, ex: @GetCode("nomeAqui")
+    public String value();
 }

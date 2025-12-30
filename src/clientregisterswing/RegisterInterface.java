@@ -5,35 +5,23 @@
 package clientregisterswing;
 
 import client.dao.MapDAOSingleton;
-import clientstable.TableModelSingleton;
 import client.domain.Client;
 import client.servicesexecutor.ClientServiceExecutor;
 import client.servicesexecutor.Exception.EntityAlredyExistsException;
 import client.servicesexecutor.Exception.EntityNotFoundException;
-import clientstable.AddClientTable;
-import clientstable.ChangeClientTable;
-import clientstable.ClientDeletorTable;
-import clientstable.ClientFinderTable;
 import clientstable.ClientTable;
-import clientstable.ClientTableSingleton;
+import clientstable.Singleton.ClientTableSingleton;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
 
 /**
  *
  * @author lheop
  */
 public class RegisterInterface extends javax.swing.JFrame {
-
-    private static DefaultTableModel defaultTableModel;
-
+    
     private static ClientServiceExecutor clientServiceExecutor;
-
-    private static AddClientTable addClientTable;
-    private static ChangeClientTable changeClienteTable;
-    private static ClientFinderTable clientFinderTable;
-    private static ClientDeletorTable clientDeletorTable;
+    private static ClientTable clientTable;
 
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(RegisterInterface.class.getName());
 
@@ -42,15 +30,10 @@ public class RegisterInterface extends javax.swing.JFrame {
      */
     public RegisterInterface() {
         initComponents();
-        initCustomComponents();
-
+        clientTable = ClientTableSingleton.getInstance(tabelaClientesCadasrados);
+        
         clientServiceExecutor = MapDAOSingleton.getClientMapDAO();
-
-        addClientTable = ClientTableSingleton.addTableInstance();
-        changeClienteTable = ClientTableSingleton.changeTableInstance();
-        clientFinderTable = ClientTableSingleton.finderTableInstance();
-        clientDeletorTable = ClientTableSingleton.deletorTableInstance();
-        ClientTable.setClientInterface(this);
+        clientServiceExecutor.attach(clientTable);
     }
 
     /**
@@ -235,6 +218,11 @@ public class RegisterInterface extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        tabelaClientesCadasrados.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                tabelaClientesCadasradosFocusLost(evt);
+            }
+        });
         tabelaClientesCadasrados.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 tabelaClientesCadasradosMouseClicked(evt);
@@ -474,19 +462,17 @@ public class RegisterInterface extends javax.swing.JFrame {
 
     private void btnSalvarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnSalvarMouseClicked
         // TODO add your handling code here:
-        ClientDTO dto = getClientDTO();
-        var client = clientServiceExecutor.read(dto.cpf);
+        var client = clientServiceExecutor.read(txtCpf.getText());
 
         try {
             if (client != null) throw new EntityAlredyExistsException();
         } catch (EntityAlredyExistsException e) {
-            JOptionPane.showMessageDialog(rootPane, Client.class.getSimpleName() + " " + dto.cpf + e.getMessage(),
+            JOptionPane.showMessageDialog(rootPane, Client.class.getSimpleName() + " " + txtCpf.getText() + e.getMessage(),
                     "Cadastrar cliente", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
-        clientServiceExecutor.create(new Client(dto.nome, dto.cpf, dto.email, dto.endereco, dto.numero, dto.celular));
-        addClientTable.executor(clientServiceExecutor.read(dto.cpf));
+        
+        clientServiceExecutor.create(new Client(txtNome.getText(), txtCpf.getText(), txtEmail.getText(), txtEndereco.getText(), txtNumero.getText(), txtCelular.getText()));
         JOptionPane.showMessageDialog(rootPane, "Cliente cadastrado com sucesso!", "Cadastrar cliente", JOptionPane.INFORMATION_MESSAGE);
 
         txtPadrao();
@@ -494,19 +480,17 @@ public class RegisterInterface extends javax.swing.JFrame {
 
     private void btnAlterarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnAlterarMouseClicked
         // TODO add your handling code here:
-        ClientDTO dto = getClientDTO();
-        var client = clientServiceExecutor.read(dto.cpf);
+        var client = clientServiceExecutor.read(txtCpf.getText());
 
         try {
             if (client == null) throw new EntityNotFoundException();
         } catch(EntityNotFoundException e) {
             JOptionPane.showMessageDialog(rootPane, Client.class.getSimpleName() + " " +
-                    dto.cpf + e.getMessage(), "Alterar cliente", JOptionPane.ERROR_MESSAGE);
+                    txtCpf.getText() + e.getMessage(), "Alterar cliente", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        clientServiceExecutor.update(dto.cpf, new Client(dto.nome, dto.cpf, dto.email, dto.endereco, dto.numero, dto.celular));
-        changeClienteTable.executor(clientServiceExecutor.read(dto.cpf));
+        clientServiceExecutor.update(txtCpf.getText(), new Client(txtNome.getText(), txtCpf.getText(), txtEmail.getText(), txtEndereco.getText(), txtNumero.getText(), txtCelular.getText()));
         JOptionPane.showMessageDialog(rootPane, "Cliente alterado com sucesso!", "Alterar cliente", JOptionPane.INFORMATION_MESSAGE);
 
         txtPadrao();
@@ -524,25 +508,42 @@ public class RegisterInterface extends javax.swing.JFrame {
 
     private void btnConsultarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnConsultarMouseClicked
         // TODO add your handling code here:
-        var client = clientServiceExecutor.read(getClientDTO().cpf);
+        int getRow = tabelaClientesCadasrados.getSelectedRow();
+        /*
+        *    A variável cpfParaBusca esta sendo inicializada, caso não nenhuma linha selecionada na tabela
+        *        cliente ira receber o cpf que foi digitado como code
+        *        caso a linha esteja selecionada, ele pega o cpf automaticamente para retornar as informações.
+        */
+        String cpfParaBusca = (getRow == -1) ? txtCpf.getText()
+                : (String) tabelaClientesCadasrados.getValueAt(getRow, 1);
         
+        Client client = clientServiceExecutor.read(cpfParaBusca);
+        
+        /*
+        *    Tenta achar o cliente, caso ele não existe, envia uma exception
+        *        para que não retorne erro na tela ou retorne um cliente fantasma.
+        */
         try {
-            if(client == null) {
-                throw new EntityNotFoundException();
-            } txtClienteInfo(client);
+            if(client == null) throw new EntityNotFoundException();
+            txtClienteInfo(client);
         } catch(EntityNotFoundException e) {
-            JOptionPane.showMessageDialog(rootPane, Client.class.getSimpleName() + " " + getClientDTO().cpf
+            JOptionPane.showMessageDialog(rootPane, Client.class.getSimpleName() + " " + txtCpf.getText()
                     + e.getMessage(), "Consultar cliente", JOptionPane.ERROR_MESSAGE);
         }
+        tabelaClientesCadasrados.setSelectionMode(0);
     }//GEN-LAST:event_btnConsultarMouseClicked
 
     private void btnExcluirMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnExcluirMouseClicked
         // TODO add your handling code here:
         var client = clientServiceExecutor.read(txtCpf.getText());
+        /*
+        *    Tenta achar o cliente, caso ele não existe, envia uma exception
+        *        para que não seja feito o delete.
+        */
         try {
             if (client == null) throw new EntityNotFoundException();
         } catch(EntityNotFoundException e) {
-            JOptionPane.showMessageDialog(rootPane, Client.class.getSimpleName() + " " + getClientDTO().cpf +
+            JOptionPane.showMessageDialog(rootPane, Client.class.getSimpleName() + " " + txtCpf.getText() +
                     e.getMessage(), "Excluir cliente", JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -551,8 +552,7 @@ public class RegisterInterface extends javax.swing.JFrame {
                     client.toString() + "?", "Excluir cliente", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
         if (resposta != JOptionPane.NO_OPTION) {
             
-            clientServiceExecutor.delete(getClientDTO().cpf);
-            clientDeletorTable.executor(clientServiceExecutor.read(getClientDTO().cpf));
+            clientServiceExecutor.delete(txtCpf.getText());
             JOptionPane.showMessageDialog(rootPane, "Cliente excluído com sucesso!", "Excluir cliente", JOptionPane.WARNING_MESSAGE);
         }
         txtPadrao();
@@ -561,6 +561,10 @@ public class RegisterInterface extends javax.swing.JFrame {
     private void txtCelularActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCelularActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtCelularActionPerformed
+
+    private void tabelaClientesCadasradosFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_tabelaClientesCadasradosFocusLost
+        // TODO add your handling code here:
+    }//GEN-LAST:event_tabelaClientesCadasradosFocusLost
 
     /**
      * @param args the command line arguments
@@ -632,45 +636,4 @@ public class RegisterInterface extends javax.swing.JFrame {
     private javax.swing.JTextField txtNumero;
     // End of variables declaration//GEN-END:variables
 
-    public JTable getClientsTable() {
-        return this.tabelaClientesCadasrados;
-    }
-
-    public DefaultTableModel getTable() {
-        return this.defaultTableModel;
-    }
-
-    private void initCustomComponents() {
-
-        defaultTableModel = TableModelSingleton.getInstance();
-
-        defaultTableModel.addColumn("Nome");
-        defaultTableModel.addColumn("CPF");
-        defaultTableModel.addColumn("Email");
-
-        tabelaClientesCadasrados.setModel(defaultTableModel);
-    }
-
-    public class ClientDTO {
-
-        public String nome;
-        public String cpf;
-        public String email;
-        public String endereco;
-        public String numero;
-        public String celular;
-    }
-
-    public ClientDTO getClientDTO() {
-        ClientDTO dto = new ClientDTO();
-
-        dto.nome = this.txtNome.getText();
-        dto.cpf = this.txtCpf.getText();
-        dto.email = this.txtEmail.getText();
-        dto.endereco = this.txtEndereco.getText();
-        dto.numero = this.txtNumero.getText();
-        dto.celular = this.txtCelular.getText();
-
-        return dto;
-    }
 }

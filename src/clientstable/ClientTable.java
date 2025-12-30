@@ -5,7 +5,7 @@
 package clientstable;
 
 import client.domain.Client;
-import clientregisterswing.RegisterInterface;
+import clientstable.Singleton.TableModelSingleton;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
@@ -13,37 +13,49 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author lheop
  */
-public abstract class ClientTable {
+public class ClientTable implements IObserver<Client>{
     
-    public static RegisterInterface registerInterface;
-    public static void setClientInterface (RegisterInterface view) {
-        registerInterface = view;
-    }
-    
-    public static DefaultTableModel defaultTableModel;
-    public JTable tableClient;
-    
-    public void executor(Client client) {
-        tableServicesExecutor(client);
-    }
-    
-    public int nome = 0;
-    public int cpf = 1;
-    public int email = 2;
-    
-    protected abstract void tableServicesExecutor(Client client);
-    
-    public int getClientRow (String cpfSearch) {
-
-        defaultTableModel = registerInterface.getTable();
-        tableClient = registerInterface.getClientsTable();
+    private static DefaultTableModel defaultTableModel;
+    JTable jTable;
+    //    Responsável por settar o visual da tabela que aparece na interface.
+    public ClientTable(JTable jTable) {
+        defaultTableModel = TableModelSingleton.getInstance();
         
-        for (int i = 0; i < defaultTableModel.getRowCount(); i++) {
-            String cpfTable = (String) tableClient.getValueAt(i, this.cpf);
-            if (cpfTable.equals(cpfSearch)) {
-                return i;
-            }
-        }
-        return -1;
+        defaultTableModel.addColumn("NOME");
+        defaultTableModel.addColumn("CPF");
+        defaultTableModel.addColumn("EMAIL");
+        
+        this.jTable = jTable;
+        jTable.setModel(defaultTableModel);
+    }
+    /*
+    *    Recebe um aviso sempre que um novo cliente for criado, então adiciona ele em uma nova linha automaticamente.
+    */
+    @Override
+    public void created(Client client) {
+        defaultTableModel.addRow(new Object[]{client.getNome(), client.getCpf(), client.getEmail()});
+    }
+    /*
+    *    Recebe um aviso sempre que um cliente for alterado, então passa os novos valores para a linha automaticamente.
+    */
+    @Override
+    public void updated(Client client) {
+        
+        jTable.setValueAt(client.getNome(), getRow(client), 0);
+        jTable.setValueAt(client.getCpf(), getRow(client), 1);
+        jTable.setValueAt(client.getEmail(), getRow(client), 2);
+    }
+    /*
+    *    Recebe um aviso sempre que um cliente for excluído, então tira ele da linha automaticamente.
+    */
+    @Override
+    public void deleted(Client client) {
+        defaultTableModel.removeRow(getRow(client));
+    }
+    
+    private int getRow(Client client) {
+        for (int i = 0; i < jTable.getRowCount(); i++) {
+            if (client.getCpf().equals(jTable.getValueAt(i, 1))) return i;
+        } return -1;
     }
 }
